@@ -47,7 +47,7 @@ require(['jquery', 'underscore', 'oae.core', '/admin/js/admin.util.js', 'jquery.
                     'type': 'POST',
                     'data': {
                         'alias': $(this).attr('data-alias'),
-                        'name': value
+                        'displayName': value
                     },
                     'success': function() {
                         oae.api.util.notification('Tenant name updated', 'The tenant name has been successfully updated.');
@@ -149,7 +149,7 @@ require(['jquery', 'underscore', 'oae.core', '/admin/js/admin.util.js', 'jquery.
             'type': 'POST',
             'data': {
                 'alias': $.trim($('#createtenant-alias').val()),
-                'name': $.trim($('#createtenant-name').val()),
+                'displayName': $.trim($('#createtenant-name').val()),
                 'host': $.trim($('#createtenant-host').val())
             },
             'success': function() {
