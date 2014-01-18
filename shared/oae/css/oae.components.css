@@ -90,12 +90,12 @@ a.oae-plain-link:hover {
 }
 
 .oae-page {
-    min-width: 280px;
+    min-width: 200px;
     padding: 5px 25px;
 }
 
 .oae-page.oae-page-expanded {
-    min-width: 480px;
+    min-width: 400px;
     padding: 5px 25px 5px 220px;
 }
 
