@@ -18,11 +18,9 @@ function package_and_upload {
     git checkout master
     rm -rf target
     bin/package -su --upload-bucket=oae-releases-travis
-}
 
-echo "bin/package:"
-cat bin/package
-echo "end bin/package"
+    echo $?
+}
 
 if [[ "$TRAVIS_REPO_SLUG" == "$EXPECTED_REPOSITORY" && "$TRAVIS_BRANCH" == "$EXPECTED_BRANCH" && "$TRAVIS_PULL_REQUEST" == "$EXPECTED_PULL_REQUEST" ]]; then
     echo "going to package and upload"
