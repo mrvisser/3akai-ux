@@ -16,6 +16,7 @@ EXPECTED_PULL_REQUEST="1"
 function package_and_upload {
     git reset --hard origin/master
     git checkout master
+    git fetch --tags
     rm -rf target
     bin/package -su --upload-bucket=oae-releases-travis
 }
