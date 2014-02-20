@@ -19,7 +19,7 @@ function package_and_upload {
     rm -rf target
     bin/package -su --upload-bucket=oae-releases-travis
 
-    echo $?
+    echo "bin/package exit code: $?"
 }
 
 if [[ "$TRAVIS_REPO_SLUG" == "$EXPECTED_REPOSITORY" && "$TRAVIS_BRANCH" == "$EXPECTED_BRANCH" && "$TRAVIS_PULL_REQUEST" == "$EXPECTED_PULL_REQUEST" ]]; then

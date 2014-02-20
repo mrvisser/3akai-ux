@@ -88,3 +88,6 @@ services:
 script:
   - grunt test --qunit-host cam.oae.com
   - etc/scripts/travis-upload.sh
+
+after_success:
+  - echo "after_success"

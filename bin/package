@@ -88,6 +88,8 @@ if (!uiVersion) {
     }
 }
 
+CoreUtil.logSuccess('WHAT ARE YOU RUNNING????');
+
 CoreUtil.logSuccess('Resolved UI version to be '.text + uiVersion.white);
 
 // Loudly optimize the UI into the target directory
