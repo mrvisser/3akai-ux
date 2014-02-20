@@ -102,6 +102,8 @@ var packageFilename = util.format('3akai-ux-%s', uiVersion);
 var packageResult = PackageUtil.packageRelease(srcDir, '.', packageFilename, 10);
 var checksumResult = PackageUtil.checksumPackage(packageResult.packagePath, 11);
 
+InvalidJunk;
+
 CoreUtil.logInfo(JSON.stringify(argv, null, 2));
 CoreUtil.logInfo(argv.u);
 
