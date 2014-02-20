@@ -17,6 +17,7 @@ function package_and_upload {
     git reset --hard origin/master
     git checkout master
     rm -rf target
+    cat bin/package
     bin/package -su --upload-bucket=oae-releases-travis
 
     echo "bin/package exit code: $?"
