@@ -9,9 +9,9 @@
 #   * The build was not performed on a pull request to the master branch
 ##
 
-EXPECTED_REPOSITORY="oaeproject/3akai-ux"
+EXPECTED_REPOSITORY="mrvisser/3akai-ux"
 EXPECTED_BRANCH="master"
-EXPECTED_PULL_REQUEST=false
+EXPECTED_PULL_REQUEST="1"
 
 function package_and_upload {
     git reset --hard origin/master
