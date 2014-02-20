@@ -97,12 +97,12 @@ CoreUtil.logSuccess('Successfully optimized the UI files into the '.text + 'targ
 // Save the system info into the 3akai-ux target directory. This will tell us at least what version we are
 PackageUtil.saveBuildInfo(srcDir, uiVersion, systemInfo, 9);
 
+InvalidJunk;
+
 // Package the source directory into a tarball
 var packageFilename = util.format('3akai-ux-%s', uiVersion);
 var packageResult = PackageUtil.packageRelease(srcDir, '.', packageFilename, 10);
 var checksumResult = PackageUtil.checksumPackage(packageResult.packagePath, 11);
-
-InvalidJunk;
 
 CoreUtil.logInfo(JSON.stringify(argv, null, 2));
 CoreUtil.logInfo(argv.u);
