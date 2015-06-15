@@ -812,6 +812,7 @@ define(['exports', 'require', 'jquery', 'underscore', 'oae.api.config', 'markdow
             'neverSubmit': true,
             'retrieveLimit': 10,
             'url': '/api/search/general',
+            'scope': '_all',
             'scroll': 190,
             'searchObjProps': 'id, displayName',
             'selectedItemProp': 'displayName',
@@ -877,22 +878,50 @@ define(['exports', 'require', 'jquery', 'underscore', 'oae.api.config', 'markdow
          *                         clicking on them. In order to add a ghost item, the same data format as the `preFill` array can be used. If a ghost item
          *                         should be selected to start off with, the `selected` property on the ghost item should be set to `true`
          *
-         * @param  {Element|String}     $element                        jQuery element or jQuery selector for that element that represents the element on which the autosuggest should be initialized
-         * @param  {Object}             [options]                       JSON Object containing options to pass to the autosuggest component. It supports all of the standard options documented at https://github.com/wuyuntao/jquery-autosuggest
-         * @param  {Object[]}           [options.preFill]               Items that should be pre-filled into the autosuggest field upon initialization
-         * @param  {Boolean}            [options.preFill[i].fixed]      Whether or not the pre-filled item should be undeleteable from the selection list
-         * @param  {Object[]}           [options.ghost]                 Ghost items that should be added to the autosuggest field upon initialization. This has the same format as `options.preFill`
-         * @param  {Boolean}            [options.ghost[i].selected]     Whether or not the ghost item should be selected by default
-         * @param  {Object[]}           [options.exclude]               Specific items that should be excluded from suggestions
-         * @param  {String}             [options.url]                   URL for the REST endpoint that should be used to fetch the suggested results
-         * @param  {Function}           [options.selectionChanged]      Function that will be executed when the selection in the autosuggest field has changed
-         * @param  {String[]}           [resourceTypes]                 Array of resourceTypes that should be used for the search. By default, `user` and `group` will be used
-         * @param  {Function}           [callback]                      Standard callback function
-         * @throws {Error}                                              Error thrown when no source element has been provided
+         * @param  {Element|String}     $element                            jQuery element or jQuery selector for that element that represents the element on which the autosuggest should be initialized
+         * @param  {Object}             [options]                           JSON Object containing options to pass to the autosuggest component. It supports all of the standard options documented at https://github.com/wuyuntao/jquery-autosuggest
+         * @param  {Object[]}           [options.preFill]                   Items that should be pre-filled into the autosuggest field upon initialization
+         * @param  {Boolean}            [options.preFill[i].fixed]          Whether or not the pre-filled item should be undeleteable from the selection list
+         * @param  {Object[]}           [options.ghost]                     Ghost items that should be added to the autosuggest field upon initialization. This has the same format as `options.preFill`
+         * @param  {Boolean}            [options.ghost[i].selected]         Whether or not the ghost item should be selected by default
+         * @param  {Object[]}           [options.exclude]                   Specific items that should be excluded from suggestions
+         * @param  {String}             [options.url]                       URL for the REST endpoint that should be used to fetch the suggested results
+         * @param  {Function}           [options.selectionChanged]          Function that will be executed when the selection in the autosuggest field has changed
+         * @param  {String}             [options.scope]                     The scope to use for the auto-suggest search. One of: _all, _network, _share, _tenant, or <tenant alias>. Default: _all
+         * @param  {Object}             [options.resource]                  If using _share scope, the resource that is being shared for this auto-suggest
+         * @param  {Object}             [options.resource.tenant]           If using _share scope, the tenant of the resource that is being shared for this auto-suggest
+         * @param  {String}             [options.resource.tenant.alias]     If using _share scope, the tenant alias of the resource that is being shared for this auto-suggest
+         * @param  {String}             [options.resource.visibility]       If using _share scope, the visibility of the resource that is being shared for this auto-suggest. One of: private, loggedin, public
+         * @param  {Boolean}            [options.resource.canManage]        Whether or not the user can manage the resource. Default: `false`
+         * @param  {String[]}           [resourceTypes]                     Array of resourceTypes that should be used for the search. By default, `user` and `group` will be used
+         * @param  {Function}           [callback]                          Standard callback function
+         * @throws {Error}                                                  Error thrown when no source element has been provided
          */
         var setup = function($element, options, resourceTypes, callback) {
             if (!$element) {
                 throw new Error('A valid input element should be provided.');
+            }
+
+            // Merge the supplied options with the default options. Default options will be overriden
+            // by supplied options
+            options = _.extend({}, defaultOptions, options);
+
+            // Ensure that the _share properties were specified properly
+            if (options.scope === '_share') {
+                if (!_.isObject(options.resource)) {
+                    throw new Error('A valid resource object should be provided for _share search.');
+                } else if (!_.isObject(options.resource.tenant)) {
+                    throw new Error('A valid resource tenant object should be provided for _share search.');
+                } else if (!_.isString(options.resource.tenant.alias)) {
+                    throw new Error('A valid resource tenant alias should be provided for _share search.');
+                } else if (!_.isString(options.resource.visibility)) {
+                    throw new Error('A valid resource visibility should be provided for _share search.');
+                } else if (options.resource.canManage && !_.isBoolean(options.resource.canManage)) {
+                    throw new Error('Either a boolean or a falsey value must be provided for resource.canManage for _share search.');
+                }
+
+                // By default, we suggest that the user cannot manage the resource
+                options.resource.canManage = options.resource.canManage || false;
             }
 
             // Load the autosuggest templates in case they haven't been loaded yet
@@ -915,10 +944,6 @@ define(['exports', 'require', 'jquery', 'underscore', 'oae.api.config', 'markdow
                     options.emptyText = i18nAPI.translate('__MSG__NO_RESULTS_FOUND__');
                 }
 
-                // Merge the supplied options with the default options. Default options will be overriden
-                // by supplied options
-                options = _.extend({}, defaultOptions, options);
-
                 // Add the resourceTypes onto the additional querystring parameter that needs to be added to the request.
                 // We need to do this as querystring-formatted string as the Autosuggest component is not able to deal with objects.
                 if (!resourceTypes) {
@@ -928,8 +953,16 @@ define(['exports', 'require', 'jquery', 'underscore', 'oae.api.config', 'markdow
                 $.each(resourceTypes, function(index, resourceType) {
                     options.extraParams += '&resourceTypes=' + resourceType;
                 });
-                // Add the parameter that specifies whether or not results from other tenants need to be included as well
-                options.extraParams += '&scope=_interact';
+
+                // Add scope and scope-dependent query string parameters
+                options.extraParams += '&scope=' + options.scope;
+                if (options.resource) {
+                    options.extraParams += '&resourceTenantAlias=' + encodeURIComponent(resource.tenant.alias);
+                    options.extraParams += '&resourceVisibility=' + encodeURIComponent(resource.visibility);
+                    if (_.isBoolean(resource.canManage)) {
+                        options.extraParams += '&resourceCanManage=' + resource.canManage;
+                    }
+                }
 
                 // By default, the autosuggest component will only show results in the suggested items that actually match the query
                 // on one of the fields specified in the `searchObjProps` parameter. However, as we rely on the REST endpoint to do
@@ -970,6 +1003,7 @@ define(['exports', 'require', 'jquery', 'underscore', 'oae.api.config', 'markdow
                     // Get the query from the request URL on the Ajax object, as that is the only provided clue
                     // for finding out the search query
                     var query = $.url(this.url).param('q');
+
 
                     data.results = _.chain(data.results)
                         // Remove any results in the exclusion list
